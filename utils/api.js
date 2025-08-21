@@ -76,7 +76,7 @@ let socket;
 
 export const initWebSocket = (onData) => {
   if (!socket) {
-    socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001');
+    socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.245:3001');
     
     socket.on('latestData', (data) => {
       onData(data);
