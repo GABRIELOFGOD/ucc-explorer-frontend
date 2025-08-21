@@ -20,7 +20,6 @@ export default function Address() {
           setAddress(response.data);
 
           const personalTransactions = await getLatestTransactionsForAddress(id);
-          console.log("PERSONAL", personalTransactions);
           setTransactions(personalTransactions.data.transactions);
           
         } catch (error) {
