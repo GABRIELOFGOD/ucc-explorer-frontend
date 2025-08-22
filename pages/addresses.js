@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { getValidators, search } from "../utils/api"; // Using validators as sample address data
+import { getLatestTransactions, search } from "../utils/api"; // Using validators as sample address data
 import { FaSearch, FaSyncAlt } from "react-icons/fa";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function Addresses() {
   const [addresses, setAddresses] = useState([]);
@@ -13,8 +14,19 @@ export default function Addresses() {
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        const response = await getValidators(); // Using validators as sample address data
-        setAddresses(response.data);
+        //TODO: Adjust this to user friendly way later by fetching from the backend
+        const response = await getLatestTransactions();
+        const gotIt = response.data.transactions;
+        const walletSet = new Set();
+        gotIt.length && gotIt.forEach(tx => {
+          if (tx.from) walletSet.add(tx.from);
+          if (tx.to) walletSet.add(tx.to);
+        });
+        const uniqueAddresses = Array.from(walletSet).map(addr => ({
+          address: addr,
+          name: addr
+        }));
+        setAddresses(uniqueAddresses);
       } catch (error) {
         console.error("Error fetching addresses:", error);
       } finally {
@@ -30,7 +42,7 @@ export default function Addresses() {
     try {
       const response = await search(query);
       const data = response.data;
-      console.log("DATA", data);
+
       if (data.type === "address") {
         router.push(`/address/${data.data.address}`);
       }
@@ -117,12 +129,17 @@ export default function Addresses() {
                         <div className="address-icon">A{index + 1}</div>
                         <div className="address-details">
                           <div className="address-label">{address.name}</div>
-                          <div className="address-hash">
-                            {address.address.substring(0, 6)}...
-                            {address.address.substring(
-                              address.address.length - 4
-                            )}
-                          </div>
+                          <Link
+                            href={`/address/${address.address}`}
+                            className="hash-text"
+                          >
+                            <div className="address-hash">
+                              {address.address.substring(0, 6)}...
+                              {address.address.substring(
+                                address.address.length - 4
+                              )}
+                            </div>
+                          </Link>
                         </div>
                       </div>
                     </td>

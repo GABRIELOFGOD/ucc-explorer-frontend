@@ -31,7 +31,7 @@ export default function Transaction() {
     try {
       const response = await search(query);
       const data = response.data;
-      console.log("DATA", data);
+
       if (data.type === "address") {
         router.push(`/address/${data.data.address}`);
       }

@@ -23,7 +23,7 @@ export default function Blocks() {
       try {
         const response = await getLatestBlocks(currentPage, 10);
         setBlocks(response.data.blocks);
-        setTotalPages(response.data.totalPages);
+        setTotalPages(response.data.totalPages >= 10 ? 10 : response.data.totalPages);
       } catch (error) {
         console.error("Error fetching blocks:", error);
       } finally {
@@ -46,7 +46,7 @@ export default function Blocks() {
     try {
       const response = await search(query);
       const data = response.data;
-      console.log("DATA", data);
+
       if (data.type === "address") {
         router.push(`/address/${data.data.address}`);
       }
