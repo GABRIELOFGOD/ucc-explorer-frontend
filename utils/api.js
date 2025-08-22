@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 // Create axios instance
 const api = axios.create({
   // baseURL: 'http://localhost:3001/api',
-  baseURL: 'http://ucc.ccpay.space/api',
+  baseURL: 'https://ucc.ccpay.space/api',
 });
 
 // Function to get network info
@@ -82,7 +82,7 @@ let socket;
 export const initWebSocket = (onData) => {
   if (!socket) {
     // socket = io('http://localhost:3001');
-    socket = io('http://ucc.ccpay.space');
+    socket = io('https://ucc.ccpay.space');
     
     socket.on('latestData', (data) => {
       onData(data);
