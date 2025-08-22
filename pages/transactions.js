@@ -13,6 +13,7 @@ export default function Transactions() {
     const fetchTransactions = async () => {
       try {
         const response = await getLatestTransactions(currentPage, 10);
+        console.log("TRANSACTIONS", response);
         setTransactions(response.data.transactions);
         setTotalPages(response.data.totalPages);
       } catch (error) {

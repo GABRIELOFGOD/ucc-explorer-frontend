@@ -18,8 +18,10 @@ export const getBlockByNumber = (number) => api.get(`/blocks/${number}`);
 // Function to get latest transactions
 export const getLatestTransactions = (page = 1, limit = 10) => api.get(`/transactions?page=${page}&limit=${limit}`);
 
-// Function to get latest transactions
+// Function to get latest transactions for an address
 export const getLatestTransactionsForAddress = (address, page = 1, limit = 10) => api.get(`/transactions?page=${page}&limit=${limit}&address=${address}`);
+
+export const getAllAddresses = (page = 1, limit = 10) => api.get(`/addresses?page=${page}&limit=${limit}`);
 
 // Function to get transaction by hash
 export const getTransactionByHash = (hash) => api.get(`/transactions/${hash}`);

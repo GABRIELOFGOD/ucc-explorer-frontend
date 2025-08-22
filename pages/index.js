@@ -8,6 +8,7 @@ export default function Home() {
   const [latestBlocks, setLatestBlocks] = useState([]);
   const [latestTransactions, setLatestTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSearch, setLoadingSearch] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,6 +49,17 @@ export default function Home() {
       closeWebSocket();
     };
   }, []);
+
+  const sendSearchQuery = async (query) => {
+    setLoadingSearch(true)
+    try {
+      const response = await handl
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingSearch(false);
+    }
+  }
 
   return (
     <div className="main-content">

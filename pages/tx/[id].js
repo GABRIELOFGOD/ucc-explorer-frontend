@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getTransactionByHash, timeAgo } from '../../utils/api';
 import Link from 'next/link';
-import { FaArrowDown, FaArrowLeft, FaCheckCircle, FaClock, FaCoins, FaCopy, FaCube, FaExclamationTriangle, FaGasPump, FaHashtag, FaSearch, FaSyncAlt, FaUser } from 'react-icons/fa';
+import { FaArrowDown, FaArrowLeft, FaCheckCircle, FaClock, FaCoins, FaCopy, FaCube, FaExclamationTriangle, FaGasPump, FaHashtag, FaSearch, FaSyncAlt, FaUser, FaReceipt } from 'react-icons/fa';
 
 export default function Transaction() {
   const router = useRouter();
