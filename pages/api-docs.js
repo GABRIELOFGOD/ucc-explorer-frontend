@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getApiDocs } from "../utils/api";
+import { getApiDocs, search } from "../utils/api";
 import Link from "next/link";
 import {
   FaArrowLeft,
@@ -10,13 +10,17 @@ import {
   FaSearch,
   FaServer,
   FaTachometerAlt,
-  FaSyncAlt
+  FaSyncAlt,
 } from "react-icons/fa";
+import { useRouter } from "next/router";
 
 export default function ApiDocs() {
   const [docs, setDocs] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedEndpoint, setSelectedEndpoint] = useState(null);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchDocs = async () => {
@@ -33,22 +37,53 @@ export default function ApiDocs() {
     fetchDocs();
   }, []);
 
+  const sendSearchQuery = async (query) => {
+    setLoadingSearch(true);
+    try {
+      const response = await search(query);
+      const data = response.data;
+      console.log("DATA", data);
+      if (data.type === "address") {
+        router.push(`/address/${data.data.address}`);
+      }
+      if (data.type === "transaction") {
+        router.push(`/tx/${data.data.hash}`);
+      }
+      if (data.type === "block") {
+        router.push(`/block/${data.data.number}`);
+      }
+      if (data.type === "not_found") {
+        toast.error("No results found for your search query.");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingSearch(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="main-content">
         <div className="top-nav">
           <div className="search-container">
             <div className="search-bar">
-              <FaSearch className='search-icon' />
+              <FaSearch className="search-icon" />
               <input
                 type="text"
                 className="search-input"
-                placeholder="Search by Address / Txn Hash / Block"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
+                placeholder={
+                  loadingSearch
+                    ? "Searching..."
+                    : "Search by Address / Txn Hash / Block"
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    sendSearchQuery(e.target.value);
+                    // window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
                   }
                 }}
+                disabled={loadingSearch}
               />
             </div>
           </div>
@@ -84,16 +119,22 @@ export default function ApiDocs() {
       <div className="top-nav">
         <div className="search-container">
           <div className="search-bar">
-            <FaSearch className='search-icon' />
+            <FaSearch className="search-icon" />
             <input
               type="text"
               className="search-input"
-              placeholder="Search by Address / Txn Hash / Block"
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
+              placeholder={
+                loadingSearch
+                  ? "Searching..."
+                  : "Search by Address / Txn Hash / Block"
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  sendSearchQuery(e.target.value);
+                  // window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
                 }
               }}
+              disabled={loadingSearch}
             />
           </div>
         </div>

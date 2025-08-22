@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 
 // Create axios instance
 const api = axios.create({
+  // baseURL: 'http://localhost:3001/api',
   baseURL: 'http://ucc.ccpay.space/api',
 });
 
@@ -44,6 +45,8 @@ export const verifyContract = (data) => api.post('/verify-contract', data);
 // Function to get API documentation
 export const getApiDocs = () => api.get('/docs');
 
+export const getContracts = (address) => api.get(`/contracts?address=${address}`);
+
 // Time ago function
 export const timeAgo = (timestamp) => {
   const now = new Date();
@@ -78,6 +81,7 @@ let socket;
 
 export const initWebSocket = (onData) => {
   if (!socket) {
+    // socket = io('http://localhost:3001');
     socket = io('http://ucc.ccpay.space');
     
     socket.on('latestData', (data) => {

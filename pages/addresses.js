@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
-import { getValidators } from '../utils/api'; // Using validators as sample address data
-import Link from 'next/link';
-import { FaSearch, FaSyncAlt } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { getValidators, search } from "../utils/api"; // Using validators as sample address data
+import { FaSearch, FaSyncAlt } from "react-icons/fa";
+import { useRouter } from "next/router";
 
 export default function Addresses() {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -13,7 +16,7 @@ export default function Addresses() {
         const response = await getValidators(); // Using validators as sample address data
         setAddresses(response.data);
       } catch (error) {
-        console.error('Error fetching addresses:', error);
+        console.error("Error fetching addresses:", error);
       } finally {
         setLoading(false);
       }
@@ -22,21 +25,52 @@ export default function Addresses() {
     fetchAddresses();
   }, []);
 
+  const sendSearchQuery = async (query) => {
+    setLoadingSearch(true);
+    try {
+      const response = await search(query);
+      const data = response.data;
+      console.log("DATA", data);
+      if (data.type === "address") {
+        router.push(`/address/${data.data.address}`);
+      }
+      if (data.type === "transaction") {
+        router.push(`/tx/${data.data.hash}`);
+      }
+      if (data.type === "block") {
+        router.push(`/block/${data.data.number}`);
+      }
+      if (data.type === "not_found") {
+        toast.error("No results found for your search query.");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingSearch(false);
+    }
+  };
+
   return (
     <div className="main-content">
       <div className="top-nav">
         <div className="search-container">
           <div className="search-bar">
-            <FaSearch className='search-icon' />
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Search by Address / Txn Hash / Block"
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              className="search-input"
+              placeholder={
+                loadingSearch
+                  ? "Searching..."
+                  : "Search by Address / Txn Hash / Block"
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  sendSearchQuery(e.target.value);
+                  // window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
                 }
               }}
+              disabled={loadingSearch}
             />
           </div>
         </div>
@@ -45,16 +79,16 @@ export default function Addresses() {
           <div className="network-name">Testnet</div>
         </div>
       </div>
-      
+
       <div className="page-header">
         <h1 className="page-title">Addresses</h1>
       </div>
-      
+
       <div className="table-container">
         <div className="table-header">
           <div className="table-title">Address List</div>
         </div>
-        
+
         {loading ? (
           <div className="detail-item">
             <div className="detail-icon">
@@ -80,27 +114,36 @@ export default function Addresses() {
                   <tr key={index}>
                     <td>
                       <div className="hash-row">
-                        <div className="address-icon">
-                          A{index + 1}
-                        </div>
+                        <div className="address-icon">A{index + 1}</div>
                         <div className="address-details">
                           <div className="address-label">{address.name}</div>
                           <div className="address-hash">
-                            {address.address.substring(0, 6)}...{address.address.substring(address.address.length - 4)}
+                            {address.address.substring(0, 6)}...
+                            {address.address.substring(
+                              address.address.length - 4
+                            )}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td>
                       <div className="amount-value">
-                        {Math.floor(Math.random() * 10000).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })} tUCC
+                        {Math.floor(Math.random() * 10000).toLocaleString(
+                          undefined,
+                          { minimumFractionDigits: 4, maximumFractionDigits: 4 }
+                        )}{" "}
+                        tUCC
                       </div>
                     </td>
                     <td>
-                      <div className="amount-value">{Math.floor(Math.random() * 100)}</div>
+                      <div className="amount-value">
+                        {Math.floor(Math.random() * 100)}
+                      </div>
                     </td>
                     <td>
-                      <div className="hash-text">{Math.floor(Math.random() * 60)} seconds ago</div>
+                      <div className="hash-text">
+                        {Math.floor(Math.random() * 60)} seconds ago
+                      </div>
                     </td>
                   </tr>
                 ))}

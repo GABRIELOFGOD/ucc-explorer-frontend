@@ -1,13 +1,42 @@
 import { useState, useEffect } from 'react';
-import { getLatestTransactions, timeAgo } from '../utils/api';
+import { getLatestTransactions, search, timeAgo } from '../utils/api';
 import Link from 'next/link';
 import { FaChevronLeft, FaChevronRight, FaSearch, FaSyncAlt } from 'react-icons/fa';
+import { useRouter } from 'next/router';
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+
+  const router = useRouter();
+
+  const sendSearchQuery = async (query) => {
+    setLoadingSearch(true)
+    try {
+      const response = await search(query);
+      const data = response.data;
+      console.log("DATA", data);
+      if (data.type === "address") {
+        router.push(`/address/${data.data.address}`);
+      }
+      if (data.type === "transaction") {
+        router.push(`/tx/${data.data.hash}`);
+      }
+      if (data.type === "block") {
+        router.push(`/block/${data.data.number}`);
+      }
+      if (data.type === "not_found") {
+        toast.error("No results found for your search query.");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingSearch(false);
+    }
+  }
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -42,12 +71,14 @@ export default function Transactions() {
             <input 
               type="text" 
               className="search-input" 
-              placeholder="Search by Address / Txn Hash / Block"
+              placeholder={loadingSearch ? "Searching..." : "Search by Address / Txn Hash / Block"}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
-                  window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
+                  sendSearchQuery(e.target.value);
+                  // window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
                 }
               }}
+              disabled={loadingSearch}
             />
           </div>
         </div>
@@ -133,7 +164,7 @@ export default function Transactions() {
                         #{tx.blockNumber?.toLocaleString()}
                       </Link>
                     </td>
-                    <td>{timeAgo(tx.timestamp)}</td>
+                    <td>{tx.timestamp ? timeAgo(tx.timestamp) : "N/A"}</td>
                     <td>
                       <div className="hash-row">
                         <Link href={`/address/${tx.from}`} className="hash-text">

@@ -1,14 +1,55 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { getTransactionByHash, timeAgo } from '../../utils/api';
-import Link from 'next/link';
-import { FaArrowDown, FaArrowLeft, FaCheckCircle, FaClock, FaCoins, FaCopy, FaCube, FaExclamationTriangle, FaGasPump, FaHashtag, FaSearch, FaSyncAlt, FaUser, FaReceipt } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { getTransactionByHash, search, timeAgo } from "../../utils/api";
+import Link from "next/link";
+import {
+  FaArrowDown,
+  FaArrowLeft,
+  FaCheckCircle,
+  FaClock,
+  FaCoins,
+  FaCopy,
+  FaCube,
+  FaExclamationTriangle,
+  FaGasPump,
+  FaHashtag,
+  FaSearch,
+  FaSyncAlt,
+  FaUser,
+  FaReceipt,
+} from "react-icons/fa";
 
 export default function Transaction() {
   const router = useRouter();
   const { id } = router.query;
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+
+  const sendSearchQuery = async (query) => {
+    setLoadingSearch(true);
+    try {
+      const response = await search(query);
+      const data = response.data;
+      console.log("DATA", data);
+      if (data.type === "address") {
+        router.push(`/address/${data.data.address}`);
+      }
+      if (data.type === "transaction") {
+        router.push(`/tx/${data.data.hash}`);
+      }
+      if (data.type === "block") {
+        router.push(`/block/${data.data.number}`);
+      }
+      if (data.type === "not_found") {
+        toast.error("No results found for your search query.");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingSearch(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -17,7 +58,7 @@ export default function Transaction() {
           const response = await getTransactionByHash(id);
           setTransaction(response.data);
         } catch (error) {
-          console.error('Error fetching transaction data:', error);
+          console.error("Error fetching transaction data:", error);
         } finally {
           setLoading(false);
         }
@@ -33,16 +74,22 @@ export default function Transaction() {
         <div className="top-nav">
           <div className="search-container">
             <div className="search-bar">
-              <FaSearch className='search-icon' />
-              <input 
-                type="text" 
-                className="search-input" 
-                placeholder="Search by Address / Txn Hash / Block"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder={
+                  loadingSearch
+                    ? "Searching..."
+                    : "Search by Address / Txn Hash / Block"
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    sendSearchQuery(e.target.value);
+                    // window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
                   }
                 }}
+                disabled={loadingSearch}
               />
             </div>
           </div>
@@ -51,7 +98,7 @@ export default function Transaction() {
             <div className="network-name">Testnet</div>
           </div>
         </div>
-        
+
         <div className="page-header">
           <Link href="/" className="back-button">
             <FaArrowLeft />
@@ -60,7 +107,7 @@ export default function Transaction() {
             <h1 className="page-title">Transaction Details</h1>
           </div>
         </div>
-        
+
         <div className="detail-item">
           <div className="detail-icon">
             <FaSyncAlt />
@@ -79,16 +126,22 @@ export default function Transaction() {
         <div className="top-nav">
           <div className="search-container">
             <div className="search-bar">
-              <FaSearch className='search-icon' />
-              <input 
-                type="text" 
-                className="search-input" 
-                placeholder="Search by Address / Txn Hash / Block"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder={
+                  loadingSearch
+                    ? "Searching..."
+                    : "Search by Address / Txn Hash / Block"
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    sendSearchQuery(e.target.value);
+                    // window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
                   }
                 }}
+                disabled={loadingSearch}
               />
             </div>
           </div>
@@ -97,7 +150,7 @@ export default function Transaction() {
             <div className="network-name">Testnet</div>
           </div>
         </div>
-        
+
         <div className="page-header">
           <Link href="/" className="back-button">
             <FaArrowLeft />
@@ -106,10 +159,10 @@ export default function Transaction() {
             <h1 className="page-title">Transaction Details</h1>
           </div>
         </div>
-        
+
         <div className="detail-item">
-            <div className="detail-icon">
-              <FaExclamationTriangle />
+          <div className="detail-icon">
+            <FaExclamationTriangle />
           </div>
           <div className="detail-content">
             <div className="detail-label">Transaction not found</div>
@@ -124,16 +177,22 @@ export default function Transaction() {
       <div className="top-nav">
         <div className="search-container">
           <div className="search-bar">
-            <FaSearch className='search-icon' />
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Search by Address / Txn Hash / Block" 
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              className="search-input"
+              placeholder={
+                loadingSearch
+                  ? "Searching..."
+                  : "Search by Address / Txn Hash / Block"
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  sendSearchQuery(e.target.value);
+                  // window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
                 }
               }}
+              disabled={loadingSearch}
             />
           </div>
         </div>
@@ -142,19 +201,17 @@ export default function Transaction() {
           <div className="network-name">Testnet</div>
         </div>
       </div>
-      
+
       <div className="page-header">
         <Link href="/transactions" className="back-button">
           <FaArrowLeft />
         </Link>
         <div>
           <h1 className="page-title">Transaction Details</h1>
-          <div className="hash-display">
-            {transaction.hash}
-          </div>
+          <div className="hash-display">{transaction.hash}</div>
         </div>
       </div>
-      
+
       <div className="details-grid">
         <div className="details-card">
           <div className="detail-item">
@@ -164,16 +221,14 @@ export default function Transaction() {
             <div className="detail-content">
               <div className="detail-label">Transaction Hash</div>
               <div className="detail-row">
-                <div className="detail-value">
-                  {transaction.hash}
-                </div>
+                <div className="detail-value">{transaction.hash}</div>
                 <button className="copy-button">
                   <FaCopy />
                 </button>
               </div>
             </div>
           </div>
-          
+
           <div className="detail-item">
             <div className="detail-icon">
               <FaCube />
@@ -187,17 +242,19 @@ export default function Transaction() {
               </div>
             </div>
           </div>
-          
+
           <div className="detail-item">
             <div className="detail-icon">
               <FaClock />
             </div>
             <div className="detail-content">
               <div className="detail-label">Timestamp</div>
-              <div className="detail-value">{new Date(transaction.timestamp).toLocaleString()}</div>
+              <div className="detail-value">
+                {new Date(transaction.timestamp).toLocaleString()}
+              </div>
             </div>
           </div>
-          
+
           <div className="detail-item">
             <div className="detail-icon">
               <FaUser />
@@ -212,7 +269,7 @@ export default function Transaction() {
             </div>
           </div>
         </div>
-        
+
         <div className="details-card">
           <div className="detail-item">
             <div className="detail-icon">
@@ -231,7 +288,7 @@ export default function Transaction() {
               </div>
             </div>
           </div>
-          
+
           <div className="detail-item">
             <div className="detail-icon">
               <FaCoins />
@@ -241,17 +298,19 @@ export default function Transaction() {
               <div className="amount-value amount-out">{transaction.value}</div>
             </div>
           </div>
-          
+
           <div className="detail-item">
             <div className="detail-icon">
               <FaGasPump />
             </div>
             <div className="detail-content">
               <div className="detail-label">Gas Limit</div>
-              <div className="detail-value">{transaction.gasUsed?.toLocaleString() || 'N/A'}</div>
+              <div className="detail-value">
+                {transaction.gasUsed?.toLocaleString() || "N/A"}
+              </div>
             </div>
           </div>
-          
+
           <div className="detail-item">
             <div className="detail-icon">
               <FaCheckCircle />
@@ -263,18 +322,20 @@ export default function Transaction() {
           </div>
         </div>
       </div>
-      
+
       <div className="table-container">
         <div className="table-header">
           <div className="table-title">Event Logs</div>
         </div>
-        
+
         <div className="detail-item">
           <div className="detail-icon">
             <FaReceipt />
           </div>
           <div className="detail-content">
-            <div className="detail-label">No event logs found for this transaction</div>
+            <div className="detail-label">
+              No event logs found for this transaction
+            </div>
           </div>
         </div>
       </div>

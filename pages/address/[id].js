@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { getAddressInfo, getLatestTransactionsForAddress, timeAgo } from '../../utils/api';
+import { getAddressInfo, getContracts, getLatestTransactionsForAddress, timeAgo } from '../../utils/api';
 import Link from 'next/link';
 import { FaArrowLeft, FaCheckCircle, FaClock, FaExchangeAlt, FaExclamationCircle, FaFileContract, FaSearch, FaSyncAlt, FaUser, FaWallet } from 'react-icons/fa';
 
@@ -11,6 +11,7 @@ export default function Address() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('transactions');
+  const [contracts, setContracts] = useState([]);
 
   useEffect(() => {
     if (id) {
@@ -28,6 +29,17 @@ export default function Address() {
           setLoading(false);
         }
       };
+
+      const fetchContracts = async (id) => {
+        try {
+          const response = await getContracts(id);
+          setContracts(response.data);
+        } catch (error) {
+          console.error('Error fetching contracts:', error);
+        }
+      };
+
+      fetchContracts(id);
 
       fetchAddressInfo();
     }

@@ -5,6 +5,7 @@ import { getNetworkInfo } from '../utils/api';
 import { IoIosHome } from "react-icons/io";
 import { IoCube } from "react-icons/io5";
 import { FaExchangeAlt, FaWallet, FaCoins, FaShieldAlt, FaFileContract, FaBook, FaChartLine, FaCopy } from "react-icons/fa";
+import { Toaster } from 'sonner';
 
 export default function Layout({ children }) {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function Layout({ children }) {
     { href: '/transactions', icon: FaExchangeAlt, label: 'Transactions' },
     { href: '/addresses', icon: FaWallet, label: 'Addresses' },
     { href: '/tokens', icon: FaCoins, label: 'Tokens' },
-    { href: '/validators', icon: FaShieldAlt, label: 'Validators' },
+    // { href: '/validators', icon: FaShieldAlt, label: 'Validators' },
     { href: '/verify-contract', icon: FaFileContract, label: 'Verify Contract' },
     { href: '/api-docs', icon: FaBook, label: 'API Docs' },
     { href: '/charts', icon: FaChartLine, label: 'Charts' }
@@ -90,6 +91,7 @@ export default function Layout({ children }) {
       
       {/* Main content */}
       {children}
+      <Toaster position='top-right' />
       
       <style jsx global>{`
         .layout {

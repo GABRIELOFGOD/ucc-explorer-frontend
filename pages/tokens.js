@@ -1,11 +1,15 @@
-import { useState, useEffect } from 'react';
-import { getTokens } from '../utils/api';
-import Link from 'next/link';
-import { FaSearch, FaSyncAlt } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { getTokens, search } from "../utils/api";
+import Link from "next/link";
+import { FaSearch, FaSyncAlt } from "react-icons/fa";
+import { useRouter } from "next/router";
 
 export default function Tokens() {
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTokens = async () => {
@@ -13,7 +17,7 @@ export default function Tokens() {
         const response = await getTokens();
         setTokens(response.data);
       } catch (error) {
-        console.error('Error fetching tokens:', error);
+        console.error("Error fetching tokens:", error);
       } finally {
         setLoading(false);
       }
@@ -22,21 +26,52 @@ export default function Tokens() {
     fetchTokens();
   }, []);
 
+  const sendSearchQuery = async (query) => {
+    setLoadingSearch(true);
+    try {
+      const response = await search(query);
+      const data = response.data;
+      console.log("DATA", data);
+      if (data.type === "address") {
+        router.push(`/address/${data.data.address}`);
+      }
+      if (data.type === "transaction") {
+        router.push(`/tx/${data.data.hash}`);
+      }
+      if (data.type === "block") {
+        router.push(`/block/${data.data.number}`);
+      }
+      if (data.type === "not_found") {
+        toast.error("No results found for your search query.");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingSearch(false);
+    }
+  };
+
   return (
     <div className="main-content">
       <div className="top-nav">
         <div className="search-container">
           <div className="search-bar">
-            <FaSearch className='search-icon' />
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Search by Address / Txn Hash / Block"
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              className="search-input"
+              placeholder={
+                loadingSearch
+                  ? "Searching..."
+                  : "Search by Address / Txn Hash / Block"
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  sendSearchQuery(e.target.value);
+                  // window.location.href = `/search?q=${encodeURIComponent(e.target.value)}`;
                 }
               }}
+              disabled={loadingSearch}
             />
           </div>
         </div>
@@ -45,16 +80,16 @@ export default function Tokens() {
           <div className="network-name">Testnet</div>
         </div>
       </div>
-      
+
       <div className="page-header">
         <h1 className="page-title">Tokens</h1>
       </div>
-      
+
       <div className="table-container">
         <div className="table-header">
           <div className="table-title">Token List</div>
         </div>
-        
+
         {loading ? (
           <div className="detail-item">
             <div className="detail-icon">
@@ -93,8 +128,12 @@ export default function Tokens() {
                     </td>
                     <td>
                       <div className="hash-row">
-                        <Link href={`/address/${token.address}`} className="hash-text">
-                          {token.address.substring(0, 6)}...{token.address.substring(token.address.length - 4)}
+                        <Link
+                          href={`/address/${token.address}`}
+                          className="hash-text"
+                        >
+                          {token.address.substring(0, 6)}...
+                          {token.address.substring(token.address.length - 4)}
                         </Link>
                       </div>
                     </td>
@@ -102,7 +141,13 @@ export default function Tokens() {
                       <div className="amount-value">{token.price}</div>
                     </td>
                     <td>
-                      <div className={`amount-value ${token.change24h.startsWith('+') ? 'amount-in' : 'amount-out'}`}>
+                      <div
+                        className={`amount-value ${
+                          token.change24h.startsWith("+")
+                            ? "amount-in"
+                            : "amount-out"
+                        }`}
+                      >
                         {token.change24h}
                       </div>
                     </td>
